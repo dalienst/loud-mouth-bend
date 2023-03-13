@@ -1,7 +1,6 @@
 # The Backend of Loud Mouth Blog
 A blog API that has three parts: blogging interface, whispers interface and journaling interface.
 
-## Detail
 # Blogging
 Write and publish blogs and update ability for authors. Guest users are able to read published posts.
 
