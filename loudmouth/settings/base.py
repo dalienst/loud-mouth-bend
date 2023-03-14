@@ -57,8 +57,10 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "cloudinary",
+    "ckeditor",
     # Apps
     "accounts",
+    "journal",
 ]
 
 MIDDLEWARE = [

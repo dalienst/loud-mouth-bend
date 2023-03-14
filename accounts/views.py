@@ -65,6 +65,7 @@ class LogoutView(GenericAPIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class ProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (
         IsAuthenticated,

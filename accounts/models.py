@@ -86,7 +86,9 @@ class Profile(UniversalIdModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     firstname = models.CharField(blank=True, max_length=500, null=True)
     lastname = models.CharField(blank=True, max_length=500, null=True)
-    image = CloudinaryField("images",)
+    image = CloudinaryField(
+        "images",
+    )
     bio = models.CharField(blank=True, max_length=500, null=True)
 
     def __str__(self) -> str:

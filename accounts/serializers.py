@@ -72,13 +72,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = (
-            "username",
-            "bio",
-            "image",
-            "firstname",
-            "lastname"
-        )
+        fields = ("username", "bio", "image", "firstname", "lastname")
 
     def update(self, instance, validated_data):
         instance.bio = validated_data.get("bio", instance.bio)
