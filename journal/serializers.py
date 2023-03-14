@@ -5,6 +5,7 @@ from journal.models import Journal
 
 User = get_user_model()
 
+
 class JournalSerializer(serializers.ModelSerializer):
     journal_id = serializers.CharField(
         read_only=True,

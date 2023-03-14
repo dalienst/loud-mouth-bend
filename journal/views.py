@@ -16,7 +16,9 @@ class JournalListCreateView(generics.ListCreateAPIView):
 
     queryset = Journal.objects.all()
     serializer_class = JournalSerializer
-    permission_classes = [IsOwnerOrReadOnly,]
+    permission_classes = [
+        IsOwnerOrReadOnly,
+    ]
 
     def get_queryset(self):
         return super().get_queryset().filter(author=self.request.user)
@@ -41,6 +43,6 @@ class JournalDetailView(generics.RetrieveUpdateDestroyAPIView):
             {"message": "Journal deleted successfully"},
             status=status.HTTP_204_NO_CONTENT,
         )
-    
+
     def get_queryset(self):
         return super().get_queryset().filter(author=self.request.user)
