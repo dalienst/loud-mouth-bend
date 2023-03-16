@@ -9,7 +9,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accounts.serializers import UserSerializer, LogoutSerializer, ProfileSerializer
+from accounts.serializers import (
+    UserSerializer,
+    LogoutSerializer,
+    ProfileSerializer,
+    EditorSerializer,
+)
 from accounts.models import Profile
 from accounts.permissions import IsUser, MeUser
 
@@ -19,6 +24,19 @@ User = get_user_model()
 class UserRegister(APIView):
     def post(self, request: Request, format: str = "json") -> Response:
         serializer = UserSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+        response = serializer.data
+        response["refresh"] = str(refresh)
+        response["access"] = str(refresh.access_token)
+
+        return Response(response, status=status.HTTP_201_CREATED)
+
+
+class EditorRegister(APIView):
+    def post(self, request: Request, format: str = "json") -> Response:
+        serializer = EditorSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
