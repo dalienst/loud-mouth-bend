@@ -68,6 +68,8 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel, UniversalIdMode
         help_text=_("Designates whether the user can log into this admin site."),
     )
     is_verified = models.BooleanField(default=False)
+    is_editor = models.BooleanField(default=False)
+    is_user = models.BooleanField(default=True)
 
     objects = UserManager()
     REQUIRED_FIELDS = ["username", "password"]

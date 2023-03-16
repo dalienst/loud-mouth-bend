@@ -49,11 +49,57 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "email", "username", "password", "is_verified")
-        read_only_fields = ("id", "is_verified")
+        fields = ("id", "email", "username", "password", "is_verified", "is_editor")
+        read_only_fields = ("id", "is_verified", "is_editor")
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
+        user.save()
+        Profile.objects.create(user=user)
+        return user
+
+
+class EditorSerializer(serializers.ModelSerializer):
+    """
+    Create editor creation endpoints
+    """
+
+    id = serializers.CharField(
+        read_only=True,
+    )
+
+    username = serializers.CharField(
+        max_length=20,
+        min_length=4,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+
+    password = serializers.CharField(
+        max_length=128,
+        min_length=5,
+        write_only=True,
+        validators=[
+            validate_password_digit,
+            validate_password_uppercase,
+            validate_password_symbol,
+            validate_password_lowercase,
+        ],
+    )
+
+    class Meta:
+        model = User
+        fields = ("id", "email", "username", "password", "is_verified", "is_editor")
+        read_only_fields = ("id", "is_verified", "is_editor")
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        user.is_editor = True
+        user.is_verified = True
         user.save()
         Profile.objects.create(user=user)
         return user
