@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     # Apps
     "accounts",
     "journal",
+    "news",
 ]
 
 MIDDLEWARE = [

@@ -11,6 +11,8 @@ from accounts.views import (
     ProfileDetailView,
     UserView,
     UserDetailView,
+    EditorDetailView,
+    EditorView
 )
 
 urlpatterns = [
@@ -20,6 +22,8 @@ urlpatterns = [
     path("register/", UserRegister.as_view(), name="register"),
     path("register/editor/", EditorRegister.as_view(), name="editor-register"),
     path("me/<str:id>/", UserDetailView.as_view(), name="me-detail"),
+    path("editor/<str:id>/", EditorDetailView.as_view(), name="editor-detail"),
+    path("editors/", EditorView.as_view(), name="editors"),
     path("profile/<str:user>/", ProfileDetailView.as_view(), name="profile"),
     path("users/", UserView.as_view(), name="users"),
     path("profiles/", ProfileListView.as_view(), name="profiles"),

@@ -47,6 +47,33 @@ class EditorRegister(APIView):
         return Response(response, status=status.HTTP_201_CREATED)
 
 
+class EditorDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = EditorSerializer
+    lookup_field = "id"
+    queryset = User.objects.all()
+    permission_classes = [
+        IsAuthenticated,
+        IsUser,
+    ]
+
+    def delete(self, request, *args, **kwargs):
+        user = self.request.user
+        user.delete()
+        return Response(
+            {"message": "Editor deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+
+class EditorView(generics.ListAPIView):
+    serializer_class = EditorSerializer
+    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+
+    def get_queryset(self):
+        return User.objects.filter(is_editor=True)
+
+
 class UserView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)

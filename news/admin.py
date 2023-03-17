@@ -1,3 +1,6 @@
 from django.contrib import admin
+from news.models import NewsArticle, Newspaper, NewsArticleCategory
 
-# Register your models here.
+admin.site.register(Newspaper)
+admin.site.register(NewsArticleCategory)
+admin.site.register(NewsArticle)

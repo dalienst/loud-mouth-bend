@@ -90,19 +90,28 @@ class EditorSerializer(serializers.ModelSerializer):
             validate_password_lowercase,
         ],
     )
+    articles = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ("id", "email", "username", "password", "is_verified", "is_editor")
-        read_only_fields = ("id", "is_verified", "is_editor")
+        fields = (
+            "id",
+            "email",
+            "username",
+            "password",
+            "is_verified",
+            "is_editor",
+            "articles",
+        )
+        read_only_fields = ("id", "is_verified", "is_editor", "articles")
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
-        user.is_editor = True
-        user.is_verified = True
-        user.save()
-        Profile.objects.create(user=user)
-        return user
+        editor = User.objects.create_user(**validated_data)
+        editor.is_editor = True
+        editor.is_verified = True
+        editor.save()
+        Profile.objects.create(user=editor)
+        return editor
 
 
 class ProfileSerializer(serializers.ModelSerializer):

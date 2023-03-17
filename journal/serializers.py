@@ -14,11 +14,11 @@ class JournalSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
     title = serializers.CharField(
         max_length=400,
-        min_length=20,
+        min_length=10,
     )
     image = serializers.ImageField(use_url=True, required=False)
     body = serializers.CharField(
-        min_length=20,
+        min_length=10,
     )
     slug = serializers.SlugField(read_only=True)
     author = UserSerializer(read_only=True)
