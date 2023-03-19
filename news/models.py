@@ -97,3 +97,21 @@ def slug_pre_save(sender, instance, **kwargs) -> None:
 @receiver(pre_save, sender=NewsArticle)
 def reading_time_pre_save(sender, instance, **kwargs) -> None:
     instance.read_time = math.ceil(instance.body.count(" ") // 200)
+
+
+class ArticleComment(UniversalIdModel, TimeStampedModel):
+    """
+    Comments for the news article
+    """
+    commenter = models.ForeignKey(User, related_name="commenter", on_delete=models.CASCADE)
+    article = models.ForeignKey(NewsArticle, related_name="comments", on_delete=models.CASCADE)
+    comment = models.TextField()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "News Article Comment"
+        verbose_name_plural = "News Article Comments"
+
+    def __str__(self) -> str:
+        return self.comment
+    
