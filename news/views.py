@@ -4,9 +4,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
-from news.serializers import NewsArticleSerializer
-from news.models import NewsArticle
-from accounts.permissions import IsEditor
+from news.serializers import NewsArticleSerializer, ArticleCommentSerializer
+from news.models import NewsArticle, ArticleComment
+from accounts.permissions import IsEditor, MeUser
+from news.permissions import IsOwnerOrReadOnly
 
 
 class NewsArticleListCreate(generics.ListCreateAPIView):
@@ -27,6 +28,7 @@ class NewsArticleListCreate(generics.ListCreateAPIView):
 class AllNewsArticleList(generics.ListAPIView):
     queryset = NewsArticle.objects.all()
     serializer_class = NewsArticleSerializer
+
 
 class ArticleDetail(generics.RetrieveAPIView):
     queryset = NewsArticle.objects.all()
@@ -56,3 +58,25 @@ class NewsArticleDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return NewsArticle.objects.filter(editor=self.request.user)
+
+
+class ArticleCommentListView(generics.ListCreateAPIView):
+    queryset = ArticleComment.objects.all()
+    serializer_class = ArticleCommentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, MeUser]
+
+    def perform_create(self, serializer):
+        serializer.save(commenter=self.request.user)
+
+    def get_queryset(self):
+        return ArticleComment.objects.filter(commenter=self.request.user)
+
+
+class ArticleCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ArticleComment.objects.all()
+    serializer_class = ArticleCommentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        return ArticleComment.objects.filter(commenter=self.request.user)

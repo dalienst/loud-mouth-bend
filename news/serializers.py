@@ -1,4 +1,4 @@
-from news.models import NewsArticle, Newspaper, NewsArticleCategory
+from news.models import NewsArticle, Newspaper, NewsArticleCategory, ArticleComment
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from accounts.serializers import UserSerializer, EditorSerializer
@@ -58,6 +58,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(read_only=True)
     # editor = EditorSerializer(read_only=True)
     editor = serializers.CharField(source="editor.username", read_only=True)
+    comments = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = NewsArticle
@@ -72,6 +73,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             "slug",
             "editor",
             "is_mainstory",
+            "comments",
         )
         read_only_fields = (
             "id",
@@ -80,4 +82,30 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             "slug",
             "editor",
             "is_mainstory",
+            "comments",
         )
+
+
+class ArticleCommentSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    comment = serializers.CharField(min_length=1)
+    commenter = serializers.CharField(source="commenter.username", read_only=True)
+
+    class Meta:
+        model = ArticleComment
+        fields = (
+            "id",
+            "comment",
+            "commenter",
+            "article",
+        )
+        read_only_fields = (
+            "id",
+            "commenter",
+        )
+    
+    # def create(self, validated_data):
+    #     request = self.context["request"]
+    #     validated_data["commenter"] = request.user
+    #     instance = ArticleComment.objects.create(**validated_data)
+    #     return instance

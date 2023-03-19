@@ -46,11 +46,12 @@ class UserSerializer(serializers.ModelSerializer):
             validate_password_lowercase,
         ],
     )
+    commenter = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ("id", "email", "username", "password", "is_verified", "is_editor")
-        read_only_fields = ("id", "is_verified", "is_editor")
+        fields = ("id", "email", "username", "password", "is_verified", "is_editor", "commenter",)
+        read_only_fields = ("id", "is_verified", "is_editor", "commenter")
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
