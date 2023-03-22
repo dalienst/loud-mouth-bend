@@ -7,6 +7,10 @@ from news.views import (
     ArticleDetail,
     ArticleCommentListView,
     ArticleCommentDetailView,
+    CategoryDetail,
+    CategoryListCreateView,
+    CategoryListView,
+    NewsCategoryListView,
 )
 
 urlpatterns = [
@@ -24,4 +28,8 @@ urlpatterns = [
         ArticleCommentDetailView.as_view(),
         name="articlecomment-detail",
     ),
+    path("category/", CategoryListCreateView.as_view(), name="category-list"),
+    path("category/<str:id>/", CategoryDetail.as_view(), name="category-detail"),
+    path("categories/", CategoryListView.as_view(), name="categories-list"),
+    path("newscategories/", NewsCategoryListView.as_view(), name="newscategories-list"),
 ]

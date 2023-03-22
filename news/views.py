@@ -4,10 +4,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
-from news.serializers import NewsArticleSerializer, ArticleCommentSerializer
-from news.models import NewsArticle, ArticleComment
+from news.serializers import NewsArticleSerializer, ArticleCommentSerializer, CategorySerializer
+from news.models import NewsArticle, ArticleComment, Category
 from accounts.permissions import IsEditor, MeUser
-from news.permissions import IsOwnerOrReadOnly
+from news.permissions import IsOwnerOrReadOnly, IsUserOrReadOnly
 
 
 class NewsArticleListCreate(generics.ListCreateAPIView):
@@ -75,8 +75,43 @@ class ArticleCommentListView(generics.ListCreateAPIView):
 class ArticleCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ArticleComment.objects.all()
     serializer_class = ArticleCommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsUserOrReadOnly,]
     lookup_field = "id"
 
     def get_queryset(self):
         return ArticleComment.objects.filter(commenter=self.request.user)
+
+
+class CategoryListCreateView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, MeUser]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def get_queryset(self):
+        return Category.objects.filter(owner=self.request.user)
+    
+class CategoryListView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        return Category.objects.filter(is_public=True)
+    
+class NewsCategoryListView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        return Category.objects.filter(owner=self.user.is_admin)
+    
+class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        return Category.objects.filter(owner=self.request.user)

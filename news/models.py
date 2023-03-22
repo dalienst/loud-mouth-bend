@@ -37,26 +37,17 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
     def __str__(self) -> str:
         return self.name
 
-
-class NewsArticleCategory(UniversalIdModel):
-    """
-    Different news articles could be in different or same categories
-    """
-
-    name = models.CharField(
-        max_length=400,
-    )
-    tagline = models.CharField(
-        max_length=400,
-    )
+class Category(TimeStampedModel, UniversalIdModel):
+    name = models.CharField(max_length=400, blank=False, null=False, default="")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="category")
+    is_public = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = "Article Category"
-        verbose_name_plural = "Article Categories"
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
 
     def __str__(self) -> str:
         return self.name
-
 
 class NewsArticle(UniversalIdModel, TimeStampedModel):
     """
@@ -70,13 +61,9 @@ class NewsArticle(UniversalIdModel, TimeStampedModel):
     image = CloudinaryField("news_images", blank=True, null=True)
     body = RichTextField()
     # TODO: Ability to put an article into different categories
-    # category = models.ForeignKey(
-    #     NewsArticleCategory, on_delete=models.SET_NULL, blank=True, null=True
-    # )
+    category = models.ForeignKey(Category, related_name="articlecategories", on_delete=models.SET_NULL, null=True, blank=True)
     read_time = models.PositiveIntegerField(blank=True, null=True)
-    editor = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="articles"
-    )
+    editor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     is_mainstory = models.BooleanField(default=False)
 
     class Meta:
@@ -103,8 +90,13 @@ class ArticleComment(UniversalIdModel, TimeStampedModel):
     """
     Comments for the news article
     """
-    commenter = models.ForeignKey(User, related_name="commenter", on_delete=models.CASCADE)
-    article = models.ForeignKey(NewsArticle, related_name="comments", on_delete=models.CASCADE)
+
+    commenter = models.ForeignKey(
+        User, related_name="commenter", on_delete=models.CASCADE
+    )
+    article = models.ForeignKey(
+        NewsArticle, related_name="comments", on_delete=models.CASCADE
+    )
     comment = models.TextField()
 
     class Meta:
@@ -114,4 +106,4 @@ class ArticleComment(UniversalIdModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return self.comment
-    
+

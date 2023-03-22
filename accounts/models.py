@@ -37,6 +37,7 @@ class UserManager(BaseUserManager):
         kwargs.setdefault("is_staff", True)
         kwargs.setdefault("is_superuser", True)
         kwargs.setdefault("is_editor", True)
+        kwargs.setdefault("is_admin", True)
 
         if not password:
             raise ValueError("Password is required")
@@ -46,6 +47,8 @@ class UserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True.")
         if kwargs.get("is_editor") is not True:
             raise ValueError("Superuser must have is_editor=True")
+        if kwargs.get("is_admin") is not True:
+            raise ValueError("Superuser must have is_admin=True")
 
         return self._create_user(username, email, password, **kwargs)
 
@@ -72,6 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel, UniversalIdMode
     )
     is_verified = models.BooleanField(default=False)
     is_editor = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
     is_user = models.BooleanField(default=True)
 
     objects = UserManager()
