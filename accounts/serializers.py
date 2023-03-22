@@ -110,6 +110,7 @@ class EditorSerializer(serializers.ModelSerializer):
         ],
     )
     articles = serializers.StringRelatedField(many=True, read_only=True)
+    category = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -122,8 +123,16 @@ class EditorSerializer(serializers.ModelSerializer):
             "is_editor",
             "is_admin",
             "articles",
+            "category",
         )
-        read_only_fields = ("id", "is_verified", "is_editor", "is_admin", "articles")
+        read_only_fields = (
+            "id",
+            "is_verified",
+            "is_editor",
+            "is_admin",
+            "articles",
+            "category",
+        )
 
     def create(self, validated_data):
         editor = User.objects.create_user(**validated_data)

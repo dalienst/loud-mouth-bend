@@ -34,12 +34,14 @@ class CategorySerializer(serializers.ModelSerializer):
     name = serializers.CharField(min_length=1)
     owner = serializers.CharField(source="owner.username", read_only=True)
     articlecategories = serializers.StringRelatedField(many=True, read_only=True)
+    is_public = serializers.BooleanField(default=False)
 
     class Meta:
         model = Category
         fields = (
             "id",
             "name",
+            "is_public",
             "owner",
             "articlecategories",
         )
@@ -76,8 +78,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
     editor = serializers.CharField(source="editor.username", read_only=True)
     comments = serializers.StringRelatedField(many=True, read_only=True)
     category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(),
-        slug_field="name"
+        queryset=Category.objects.all(), slug_field="name"
     )
 
     class Meta:
