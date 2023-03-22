@@ -10,7 +10,7 @@ from news.views import (
     CategoryDetail,
     CategoryListCreateView,
     CategoryListView,
-    NewsCategoryListView,
+    CategoryDetailView,
 )
 
 urlpatterns = [
@@ -21,15 +21,17 @@ urlpatterns = [
     path(
         "comment/",
         ArticleCommentListView.as_view(),
-        name="articlecomment-list",
+        name="comment-list",
     ),
     path(
         "comment/<str:id>/",
         ArticleCommentDetailView.as_view(),
-        name="articlecomment-detail",
+        name="comment-detail",
     ),
     path("category/", CategoryListCreateView.as_view(), name="category-list"),
     path("category/<str:id>/", CategoryDetail.as_view(), name="category-detail"),
     path("categories/", CategoryListView.as_view(), name="categories-list"),
-    path("newscategories/", NewsCategoryListView.as_view(), name="newscategories-list"),
+    path(
+        "categories/<str:id>/", CategoryDetailView.as_view(), name="categories-detail"
+    ),
 ]

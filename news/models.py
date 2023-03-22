@@ -37,6 +37,7 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
     def __str__(self) -> str:
         return self.name
 
+
 class Category(TimeStampedModel, UniversalIdModel):
     name = models.CharField(max_length=400, blank=False, null=False, default="")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="category")
@@ -48,6 +49,7 @@ class Category(TimeStampedModel, UniversalIdModel):
 
     def __str__(self) -> str:
         return self.name
+
 
 class NewsArticle(UniversalIdModel, TimeStampedModel):
     """
@@ -61,7 +63,13 @@ class NewsArticle(UniversalIdModel, TimeStampedModel):
     image = CloudinaryField("news_images", blank=True, null=True)
     body = RichTextField()
     # TODO: Ability to put an article into different categories
-    category = models.ForeignKey(Category, related_name="articlecategories", on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(
+        Category,
+        related_name="articlecategories",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     read_time = models.PositiveIntegerField(blank=True, null=True)
     editor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     is_mainstory = models.BooleanField(default=False)
@@ -106,4 +114,3 @@ class ArticleComment(UniversalIdModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return self.comment
-

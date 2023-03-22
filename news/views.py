@@ -4,7 +4,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
-from news.serializers import NewsArticleSerializer, ArticleCommentSerializer, CategorySerializer
+from news.serializers import (
+    NewsArticleSerializer,
+    ArticleCommentSerializer,
+    CategorySerializer,
+)
 from news.models import NewsArticle, ArticleComment, Category
 from accounts.permissions import IsEditor, MeUser
 from news.permissions import IsOwnerOrReadOnly, IsUserOrReadOnly
@@ -75,7 +79,10 @@ class ArticleCommentListView(generics.ListCreateAPIView):
 class ArticleCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ArticleComment.objects.all()
     serializer_class = ArticleCommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsUserOrReadOnly,]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsUserOrReadOnly,
+    ]
     lookup_field = "id"
 
     def get_queryset(self):
@@ -92,25 +99,32 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return Category.objects.filter(owner=self.request.user)
-    
+
+
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
     def get_queryset(self):
         return Category.objects.filter(is_public=True)
-    
-class NewsCategoryListView(generics.ListAPIView):
+
+
+class CategoryDetailView(generics.RetrieveAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    lookup_field = "id"
 
     def get_queryset(self):
-        return Category.objects.filter(owner=self.user.is_admin)
-    
+        return Category.objects.filter(is_public=True)
+
+
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly,
+    ]
     lookup_field = "id"
 
     def get_queryset(self):
