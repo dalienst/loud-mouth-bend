@@ -9,4 +9,11 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         return bool(request.user.is_authenticated)
 
     def has_object_permission(self, request: Request, view: APIView, obj: Any) -> bool:
+        return bool(obj.owner == request.user)
+    
+class IsUserOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        return bool(request.user.is_authenticated)
+
+    def has_object_permission(self, request: Request, view: APIView, obj: Any) -> bool:
         return bool(obj.commenter == request.user)

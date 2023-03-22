@@ -1,4 +1,9 @@
-from news.models import NewsArticle, Newspaper, NewsArticleCategory, ArticleComment
+from news.models import (
+    NewsArticle,
+    Newspaper,
+    ArticleComment,
+    Category,
+)
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from accounts.serializers import UserSerializer, EditorSerializer
@@ -24,19 +29,31 @@ class NewsPaperSerializer(serializers.ModelSerializer):
         )
 
 
-class NewsArticleCategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    name = serializers.CharField(min_length=2)
-    tagline = serializers.CharField(min_length=2)
+    name = serializers.CharField(min_length=1)
+    owner = serializers.CharField(source="owner.username", read_only=True)
+    articlecategories = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
-        model = NewsArticleCategory
+        model = Category
         fields = (
             "id",
             "name",
-            "tagline",
+            "owner",
+            "articlecategories",
         )
-        read_only_fields = ("id",)
+        read_only_fields = (
+            "id",
+            "owner",
+            "articlecategories",
+        )
+
+    def create(self, validated_data):
+        request = self.context["request"]
+        validated_data["owner"] = request.user
+        instance, _ = Category.objects.get_or_create(**validated_data)
+        return instance
 
 
 class NewsArticleSerializer(serializers.ModelSerializer):
@@ -56,9 +73,12 @@ class NewsArticleSerializer(serializers.ModelSerializer):
         min_length=10,
     )
     slug = serializers.SlugField(read_only=True)
-    # editor = EditorSerializer(read_only=True)
     editor = serializers.CharField(source="editor.username", read_only=True)
     comments = serializers.StringRelatedField(many=True, read_only=True)
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field="name"
+    )
 
     class Meta:
         model = NewsArticle
@@ -74,6 +94,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             "editor",
             "is_mainstory",
             "comments",
+            "category",
         )
         read_only_fields = (
             "id",
@@ -103,9 +124,3 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
             "id",
             "commenter",
         )
-    
-    # def create(self, validated_data):
-    #     request = self.context["request"]
-    #     validated_data["commenter"] = request.user
-    #     instance = ArticleComment.objects.create(**validated_data)
-    #     return instance
