@@ -38,19 +38,6 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
         return self.name
 
 
-class Category(TimeStampedModel, UniversalIdModel):
-    name = models.CharField(max_length=400, blank=False, null=False, default="")
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="category")
-    is_public = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = "Category"
-        verbose_name_plural = "Categories"
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class NewsArticle(UniversalIdModel, TimeStampedModel):
     """
     News Articles
@@ -63,19 +50,12 @@ class NewsArticle(UniversalIdModel, TimeStampedModel):
     image = CloudinaryField("news_images", blank=True, null=True)
     body = RichTextField()
     # TODO: Ability to put an article into different categories
-    category = models.ForeignKey(
-        Category,
-        related_name="articlecategories",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
     read_time = models.PositiveIntegerField(blank=True, null=True)
     editor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     is_mainstory = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ["-created_at", "title", "read_time"]
+        ordering = ["-is_mainstory", "-created_at"]
         verbose_name = "News Article"
         verbose_name_plural = "News Articles"
 
@@ -114,3 +94,17 @@ class ArticleComment(UniversalIdModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return self.comment
+
+
+class Category(TimeStampedModel, UniversalIdModel):
+    name = models.CharField(max_length=400, blank=False, null=False, default="")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="category")
+    is_public = models.BooleanField(default=False)
+    articles = models.ManyToManyField(NewsArticle, related_name="categories")
+
+    class Meta:
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
+
+    def __str__(self) -> str:
+        return self.name

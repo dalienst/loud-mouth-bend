@@ -29,35 +29,6 @@ class NewsPaperSerializer(serializers.ModelSerializer):
         )
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
-    name = serializers.CharField(min_length=1)
-    owner = serializers.CharField(source="owner.username", read_only=True)
-    articlecategories = serializers.StringRelatedField(many=True, read_only=True)
-    is_public = serializers.BooleanField(default=False)
-
-    class Meta:
-        model = Category
-        fields = (
-            "id",
-            "name",
-            "is_public",
-            "owner",
-            "articlecategories",
-        )
-        read_only_fields = (
-            "id",
-            "owner",
-            "articlecategories",
-        )
-
-    def create(self, validated_data):
-        request = self.context["request"]
-        validated_data["owner"] = request.user
-        instance, _ = Category.objects.get_or_create(**validated_data)
-        return instance
-
-
 class NewsArticleSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     read_time = serializers.IntegerField(read_only=True)
@@ -77,9 +48,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(read_only=True)
     editor = serializers.CharField(source="editor.username", read_only=True)
     comments = serializers.StringRelatedField(many=True, read_only=True)
-    category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(), slug_field="name"
-    )
+    categories = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = NewsArticle
@@ -95,7 +64,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             "editor",
             "is_mainstory",
             "comments",
-            "category",
+            "categories",
         )
         read_only_fields = (
             "id",
@@ -105,6 +74,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             "editor",
             "is_mainstory",
             "comments",
+            "categories",
         )
 
 
@@ -124,4 +94,29 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "id",
             "commenter",
+        )
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    name = serializers.CharField(min_length=1)
+    owner = serializers.CharField(source="owner.username", read_only=True)
+    articles = serializers.SlugRelatedField(
+        many=True, queryset=NewsArticle.objects.all(), slug_field="slug"
+    )
+    is_public = serializers.BooleanField(default=False)
+
+    class Meta:
+        model = Category
+        fields = (
+            "id",
+            "name",
+            "is_public",
+            "owner",
+            "articles",
+        )
+        read_only_fields = (
+            "id",
+            "owner",
+            "articles",
         )
