@@ -12,7 +12,7 @@ from accounts.views import (
     UserView,
     UserDetailView,
     EditorDetailView,
-    EditorView
+    EditorView,
 )
 
 urlpatterns = [
