@@ -18,8 +18,8 @@ class CompanySerializer(serializers.ModelSerializer):
     editors = serializers.SlugRelatedField(
         many=True, queryset=User.objects.filter(is_editor=True), slug_field="username"
     )
-    created_by = serializers.CharField(source="chief_editor.username", read_only=True)
-    newspaper = serializers.StringRelatedField(many=True, read_only=True)
+    owner = serializers.CharField(source="owner.username", read_only=True)
+    newspapers = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Company
@@ -27,14 +27,19 @@ class CompanySerializer(serializers.ModelSerializer):
             "id",
             "name",
             "editors",
-            "created_by",
-            "newspaper",
+            "owner",
+            "newspapers",
         )
         read_only_fields = (
             "id",
-            "created_by",
-            "newspaper",
+            "owner",
+            "newspapers",
         )
+
+    # def update(self, instance, validated_data):
+    #     instance.name = validated_data.get("name", instance.name)
+    #     instance.save()
+    #     return instance
 
 
 class NewsPaperSerializer(serializers.ModelSerializer):
@@ -48,7 +53,7 @@ class NewsPaperSerializer(serializers.ModelSerializer):
         queryset=Company.objects.all(), slug_field="name"
     )
     articles = serializers.StringRelatedField(many=True, read_only=True)
-    created_by = serializers.CharField(source="chief_editor.username", read_only=True)
+    created_by = serializers.CharField(read_only=True, source="created_by.username")
     created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:

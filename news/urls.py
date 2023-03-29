@@ -11,19 +11,20 @@ from news.views import (
     CategoryListCreateView,
     CategoryListView,
     CategoryDetailView,
-    CompanyListCreateView,
     CompanyDetailView,
-    CompanyListView,
+    AdminCompanyListView,
     CompanyDetail,
     NewspaperListCreateView,
     NewspaperDetailView,
     NewspaperListView,
     NewspaperDetail,
+    CompanyListView,
+    ArticleCompanyList,
 )
 
 urlpatterns = [
-    path("company/", CompanyListCreateView.as_view(), name="company-list"),
-    path("company/<str:id>/", CompanyDetailView.as_view(), name="company-detail"),
+    path("company/", AdminCompanyListView.as_view(), name="company-list"),
+    path("company/<str:owner>/", CompanyDetailView.as_view(), name="company-detail"),
     path("companies/", CompanyListView.as_view(), name="all-companies"),
     path("companies<str:id>/", CompanyDetail.as_view(), name="companies-detail"),
     path("newspaper/", NewspaperListCreateView.as_view(), name="newspaper-list"),
@@ -33,6 +34,7 @@ urlpatterns = [
     path("articles/", NewsArticleListCreate.as_view(), name="articles-list"),
     path("articles/<str:slug>/", NewsArticleDetail.as_view(), name="articles-detail"),
     path("allarticles/", AllNewsArticleList.as_view(), name="all-articles"),
+    path("artcompany/", ArticleCompanyList.as_view(), name="company-articles"),
     path("article/<str:id>/", ArticleDetail.as_view(), name="article-detail"),
     path(
         "comment/",

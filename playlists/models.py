@@ -15,3 +15,18 @@ class Playlist(UniversalIdModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return self.name
+
+class Movie(TimeStampedModel, UniversalIdModel):
+    name = models.CharField(max_length=400)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class MovieStore(UniversalIdModel, TimeStampedModel):
+    name = models.CharField(max_length=400)
+    movies = models.ManyToManyField(Movie, related_name="moviestore")
+
+    def __str__(self) -> str:
+        return self.name
+

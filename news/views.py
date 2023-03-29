@@ -11,11 +11,12 @@ from news.serializers import (
     CompanySerializer,
 )
 from news.models import NewsArticle, ArticleComment, Category, Newspaper, Company
-from accounts.permissions import IsEditor, MeUser, IsAdmin
+from accounts.permissions import IsEditor, MeUser, IsAdmin, IsAdminOrReadOnly
 from news.permissions import IsOwnerOrReadOnly, IsUserOrReadOnly
+from accounts.serializers import UserSerializer
 
 
-class CompanyListCreateView(generics.ListCreateAPIView):
+class AdminCompanyListView(generics.ListAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = [
@@ -24,15 +25,18 @@ class CompanyListCreateView(generics.ListCreateAPIView):
     ]
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        serializer.save(owner=self.request.user)
 
     def get_queryset(self):
-        return Company.objects.filter(created_by=self.request.user)
+        return Company.objects.filter(owner=self.request.user)
 
 
 class CompanyListView(generics.ListAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
 
 
 class CompanyDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -42,7 +46,7 @@ class CompanyDetailView(generics.RetrieveUpdateDestroyAPIView):
         IsAuthenticatedOrReadOnly,
         IsAdmin,
     ]
-    lookup_field = "id"
+    lookup_field = "owner"
 
     def delete(self, request: Request, *args, **kwargs) -> Response:
         """
@@ -55,7 +59,7 @@ class CompanyDetailView(generics.RetrieveUpdateDestroyAPIView):
         )
 
     def get_queryset(self):
-        return Company.objects.filter(created_by=self.request.user)
+        return Company.objects.filter(owner=self.request.user)
 
 
 class CompanyDetail(generics.RetrieveAPIView):
@@ -85,6 +89,9 @@ class NewspaperListCreateView(generics.ListCreateAPIView):
 class NewspaperListView(generics.ListAPIView):
     queryset = Newspaper.objects.all()
     serializer_class = NewsPaperSerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
 
 
 class NewspaperDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -137,6 +144,16 @@ class NewsArticleListCreate(generics.ListCreateAPIView):
 class AllNewsArticleList(generics.ListAPIView):
     queryset = NewsArticle.objects.all()
     serializer_class = NewsArticleSerializer
+
+
+class ArticleCompanyList(generics.ListAPIView):
+    serializer_class = NewsArticleSerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+
+    def get_queryset(self):
+        return NewsArticle.objects.filter(newspaper__company__owner=self.request.user)
 
 
 class ArticleDetail(generics.RetrieveAPIView):

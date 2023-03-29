@@ -10,7 +10,6 @@ import math
 
 User = get_user_model()
 
-
 class Company(UniversalIdModel, TimeStampedModel):
     """
     The newspaper company
@@ -18,11 +17,10 @@ class Company(UniversalIdModel, TimeStampedModel):
     A company can have very many editors
     """
 
-    name = models.CharField(max_length=400, blank=False, null=False)
+    owner = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=400, blank=False, null=False, default="")
     editors = models.ManyToManyField(User, related_name="companies")
-    created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="company"
-    )
+    # newspapers = models.ManyToManyField(Newspaper, related_name="newspapers")
 
     class Meta:
         ordering = ["-created_at"]
@@ -43,7 +41,6 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
     name = models.CharField(max_length=400, blank=False, null=False)
     tagline = models.CharField(max_length=400, blank=False, null=False)
 
-
     PAPER_SCHEDULE = (
         ("D", "Daily"),
         ("W", "Weekly"),
@@ -51,12 +48,8 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
         ("Y", "Yearly"),
     )
     schedule = models.CharField(max_length=1, choices=PAPER_SCHEDULE, default="D")
-    company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name="newspaper"
-    )
-    created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="chief_editor"
-    )
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="newspapers")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="newspaper")
 
     class Meta:
         ordering = ["-created_at"]
@@ -65,7 +58,6 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return self.name
-
 
 class NewsArticle(UniversalIdModel, TimeStampedModel):
     """
