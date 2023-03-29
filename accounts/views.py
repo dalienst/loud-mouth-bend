@@ -14,6 +14,7 @@ from accounts.serializers import (
     LogoutSerializer,
     ProfileSerializer,
     EditorSerializer,
+    AdminSerializer,
 )
 from accounts.models import Profile
 from accounts.permissions import IsUser, MeUser
@@ -32,6 +33,30 @@ class UserRegister(APIView):
         response["access"] = str(refresh.access_token)
 
         return Response(response, status=status.HTTP_201_CREATED)
+
+
+class UserView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+
+
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserSerializer
+    lookup_field = "id"
+    queryset = User.objects.all()
+    permission_classes = [
+        IsAuthenticated,
+        IsUser,
+    ]
+
+    def delete(self, request, *args, **kwargs):
+        user = self.request.user
+        user.delete()
+        return Response(
+            {"message": "User deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 
 class EditorRegister(APIView):
@@ -74,14 +99,21 @@ class EditorView(generics.ListAPIView):
         return User.objects.filter(is_editor=True)
 
 
-class UserView(generics.ListAPIView):
-    serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)
-    queryset = User.objects.all()
+class AdminRegister(APIView):
+    def post(self, request: Request, format: str = "json") -> Response:
+        serializer = AdminSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+        response = serializer.data
+        response["refresh"] = str(refresh)
+        response["access"] = str(refresh.access_token)
+
+        return Response(response, status=status.HTTP_201_CREATED)
 
 
-class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = UserSerializer
+class AdminDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = AdminSerializer
     lookup_field = "id"
     queryset = User.objects.all()
     permission_classes = [
@@ -93,9 +125,18 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
         user = self.request.user
         user.delete()
         return Response(
-            {"message": "User deleted successfully"},
+            {"message": "Editor deleted successfully"},
             status=status.HTTP_204_NO_CONTENT,
         )
+
+
+class AdminView(generics.ListAPIView):
+    serializer_class = AdminSerializer
+    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+
+    def get_queryset(self):
+        return User.objects.filter(is_admin=True)
 
 
 class LogoutView(GenericAPIView):

@@ -11,6 +11,28 @@ import math
 User = get_user_model()
 
 
+class Company(UniversalIdModel, TimeStampedModel):
+    """
+    The newspaper company
+    A company can have very many newspapers
+    A company can have very many editors
+    """
+
+    name = models.CharField(max_length=400, blank=False, null=False)
+    editors = models.ManyToManyField(User, related_name="companies")
+    created_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="company"
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Company"
+        verbose_name_plural = "Companies"
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Newspaper(UniversalIdModel, TimeStampedModel):
     """
     A newspaper company could have different types of
@@ -21,6 +43,7 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
     name = models.CharField(max_length=400, blank=False, null=False)
     tagline = models.CharField(max_length=400, blank=False, null=False)
 
+
     PAPER_SCHEDULE = (
         ("D", "Daily"),
         ("W", "Weekly"),
@@ -28,6 +51,12 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
         ("Y", "Yearly"),
     )
     schedule = models.CharField(max_length=1, choices=PAPER_SCHEDULE, default="D")
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="newspaper"
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="chief_editor"
+    )
 
     class Meta:
         ordering = ["-created_at"]
@@ -53,6 +82,7 @@ class NewsArticle(UniversalIdModel, TimeStampedModel):
     read_time = models.PositiveIntegerField(blank=True, null=True)
     editor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     is_mainstory = models.BooleanField(default=False)
+    # newspaper = models.ManyToManyField(Newspaper, related_name="articles")
 
     class Meta:
         ordering = ["-is_mainstory", "-created_at"]
