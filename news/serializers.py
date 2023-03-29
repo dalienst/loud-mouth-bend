@@ -91,9 +91,9 @@ class NewsArticleSerializer(serializers.ModelSerializer):
     editor = serializers.CharField(source="editor.username", read_only=True)
     comments = serializers.StringRelatedField(many=True, read_only=True)
     categories = serializers.StringRelatedField(many=True, read_only=True)
-    # newspaper = serializers.SlugRelatedField(
-    #     queryset=Newspaper.objects.all(), slug_field="name", many=True
-    # )
+    newspaper = serializers.SlugRelatedField(
+        queryset=Newspaper.objects.all(), slug_field="name", many=True
+    )
 
     class Meta:
         model = NewsArticle
@@ -110,7 +110,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             "is_mainstory",
             "comments",
             "categories",
-            # "newspaper",
+            "newspaper",
         )
         read_only_fields = (
             "id",

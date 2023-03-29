@@ -82,7 +82,7 @@ class NewsArticle(UniversalIdModel, TimeStampedModel):
     read_time = models.PositiveIntegerField(blank=True, null=True)
     editor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     is_mainstory = models.BooleanField(default=False)
-    # newspaper = models.ManyToManyField(Newspaper, related_name="articles")
+    newspaper = models.ManyToManyField(Newspaper, related_name="articles")
 
     class Meta:
         ordering = ["-is_mainstory", "-created_at"]
