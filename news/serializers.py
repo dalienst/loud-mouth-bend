@@ -3,16 +3,52 @@ from news.models import (
     Newspaper,
     ArticleComment,
     Category,
+    Company,
 )
+from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from accounts.serializers import UserSerializer, EditorSerializer
+
+User = get_user_model()
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    name = serializers.CharField(min_length=1)
+    editors = serializers.SlugRelatedField(
+        many=True, queryset=User.objects.filter(is_editor=True), slug_field="username"
+    )
+    created_by = serializers.CharField(source="chief_editor.username", read_only=True)
+    newspaper = serializers.StringRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Company
+        fields = (
+            "id",
+            "name",
+            "editors",
+            "created_by",
+            "newspaper",
+        )
+        read_only_fields = (
+            "id",
+            "created_by",
+            "newspaper",
+        )
 
 
 class NewsPaperSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    name = serializers.CharField(min_length=10)
-    tagline = serializers.CharField(min_length=10)
+    name = serializers.CharField(
+        min_length=1, validators=[UniqueValidator(queryset=Newspaper.objects.all())]
+    )
+    tagline = serializers.CharField(min_length=1)
+    schedule = serializers.CharField(min_length=1)
+    company = serializers.SlugRelatedField(
+        queryset=Company.objects.all(), slug_field="name"
+    )
+    articles = serializers.StringRelatedField(many=True, read_only=True)
+    created_by = serializers.CharField(source="chief_editor.username", read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
@@ -21,10 +57,16 @@ class NewsPaperSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "tagline",
+            "schedule",
+            "company",
+            "articles",
+            "created_by",
             "created_at",
         )
         read_only_fields = (
             "id",
+            "articles",
+            "created_by",
             "created_at",
         )
 
@@ -49,6 +91,9 @@ class NewsArticleSerializer(serializers.ModelSerializer):
     editor = serializers.CharField(source="editor.username", read_only=True)
     comments = serializers.StringRelatedField(many=True, read_only=True)
     categories = serializers.StringRelatedField(many=True, read_only=True)
+    newspaper = serializers.SlugRelatedField(
+        queryset=Newspaper.objects.all(), slug_field="name", many=True
+    )
 
     class Meta:
         model = NewsArticle
@@ -65,6 +110,7 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             "is_mainstory",
             "comments",
             "categories",
+            "newspaper",
         )
         read_only_fields = (
             "id",
@@ -118,5 +164,4 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only_fields = (
             "id",
             "owner",
-            "articles",
         )

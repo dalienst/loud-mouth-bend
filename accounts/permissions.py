@@ -19,3 +19,11 @@ class IsEditor(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return bool(obj.editor == request.user)
+
+
+class IsAdmin(permissions.BasePermission):
+    def has_permission(self, request, view: APIView):
+        return bool(request.user.is_admin)
+
+    def has_object_permission(self, request, view, obj):
+        return bool(obj.created_by == request.user)

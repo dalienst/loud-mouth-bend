@@ -1,6 +1,7 @@
 from django.contrib import admin
-from news.models import NewsArticle, Newspaper, Category, ArticleComment
+from news.models import NewsArticle, Newspaper, Category, ArticleComment, Company
 
+admin.site.register(Company)
 admin.site.register(Newspaper)
 admin.site.register(Category)
 admin.site.register(NewsArticle)

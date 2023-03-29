@@ -78,6 +78,79 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class AdminSerializer(serializers.ModelSerializer):
+    """
+    Create admin creation endpoints
+    """
+
+    id = serializers.CharField(
+        read_only=True,
+    )
+
+    username = serializers.CharField(
+        max_length=20,
+        min_length=4,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+
+    password = serializers.CharField(
+        max_length=128,
+        min_length=5,
+        write_only=True,
+        validators=[
+            validate_password_digit,
+            validate_password_uppercase,
+            validate_password_symbol,
+            validate_password_lowercase,
+        ],
+    )
+    articles = serializers.StringRelatedField(many=True, read_only=True)
+    category = serializers.StringRelatedField(many=True, read_only=True)
+    company = serializers.StringRelatedField(many=True, read_only=True)
+    chief_editor = serializers.StringRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "username",
+            "password",
+            "is_verified",
+            "is_editor",
+            "is_admin",
+            "articles",
+            "category",
+            "company",
+            "chief_editor",
+        )
+        read_only_fields = (
+            "id",
+            "is_verified",
+            "is_editor",
+            "is_admin",
+            "articles",
+            "category",
+            "company",
+            "chief_editor",
+        )
+
+    def create(self, validated_data):
+        admin = User.objects.create_user(**validated_data)
+        admin.is_editor = True
+        admin.is_admin = True
+        admin.is_verified = True
+        admin.is_staff = True
+        admin.save()
+        Profile.objects.create(user=admin)
+        return admin
+
+
 class EditorSerializer(serializers.ModelSerializer):
     """
     Create editor creation endpoints
@@ -111,6 +184,7 @@ class EditorSerializer(serializers.ModelSerializer):
     )
     articles = serializers.StringRelatedField(many=True, read_only=True)
     category = serializers.StringRelatedField(many=True, read_only=True)
+    # companies = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -124,6 +198,7 @@ class EditorSerializer(serializers.ModelSerializer):
             "is_admin",
             "articles",
             "category",
+            # "companies",
         )
         read_only_fields = (
             "id",
@@ -132,6 +207,7 @@ class EditorSerializer(serializers.ModelSerializer):
             "is_admin",
             "articles",
             "category",
+            # "companies",
         )
 
     def create(self, validated_data):
