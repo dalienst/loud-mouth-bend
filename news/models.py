@@ -10,6 +10,7 @@ import math
 
 User = get_user_model()
 
+
 class Company(UniversalIdModel, TimeStampedModel):
     """
     The newspaper company
@@ -48,8 +49,12 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
         ("Y", "Yearly"),
     )
     schedule = models.CharField(max_length=1, choices=PAPER_SCHEDULE, default="D")
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="newspapers")
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="newspaper")
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name="newspapers"
+    )
+    created_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="newspaper"
+    )
 
     class Meta:
         ordering = ["-created_at"]
@@ -58,6 +63,7 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return self.name
+
 
 class NewsArticle(UniversalIdModel, TimeStampedModel):
     """
@@ -74,10 +80,12 @@ class NewsArticle(UniversalIdModel, TimeStampedModel):
     read_time = models.PositiveIntegerField(blank=True, null=True)
     editor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     is_mainstory = models.BooleanField(default=False)
-    newspaper = models.ManyToManyField(Newspaper, related_name="articles")
+    newspaper = models.ManyToManyField(Newspaper, related_name="articles", blank=False)
 
     class Meta:
-        ordering = ["-is_mainstory", "-created_at"]
+        ordering = [
+            "-created_at",
+        ]
         verbose_name = "News Article"
         verbose_name_plural = "News Articles"
 
@@ -94,6 +102,23 @@ def slug_pre_save(sender, instance, **kwargs) -> None:
 @receiver(pre_save, sender=NewsArticle)
 def reading_time_pre_save(sender, instance, **kwargs) -> None:
     instance.read_time = math.ceil(instance.body.count(" ") // 200)
+
+
+class NewsInstance(UniversalIdModel):
+    day = models.DateField()
+    newspaper = models.ForeignKey(
+        Newspaper, related_name="newspaper_instance", on_delete=models.CASCADE
+    )
+    articles = models.ManyToManyField(NewsArticle, related_name="news_of_the_day")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["-day"]
+        verbose_name = "News Instance"
+        verbose_name_plural = "News Instances"
+
+    def __str__(self) -> str:
+        return f"{self.day} - {self.newspaper.name}"
 
 
 class ArticleComment(UniversalIdModel, TimeStampedModel):

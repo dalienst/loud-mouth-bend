@@ -9,14 +9,27 @@ from news.serializers import (
     CategorySerializer,
     NewsPaperSerializer,
     CompanySerializer,
+    NewsInstanceSerializer,
 )
-from news.models import NewsArticle, ArticleComment, Category, Newspaper, Company
+from news.models import (
+    NewsArticle,
+    ArticleComment,
+    Category,
+    Newspaper,
+    Company,
+    NewsInstance,
+)
 from accounts.permissions import IsEditor, MeUser, IsAdmin, IsAdminOrReadOnly
 from news.permissions import IsOwnerOrReadOnly, IsUserOrReadOnly
-from accounts.serializers import UserSerializer
 
 
 class AdminCompanyListView(generics.ListAPIView):
+    """
+    Admins/chief editors see the company created for them
+    as soon as they create an account on the site.
+    One company for every admin.
+    """
+
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = [
@@ -31,15 +44,12 @@ class AdminCompanyListView(generics.ListAPIView):
         return Company.objects.filter(owner=self.request.user)
 
 
-class CompanyListView(generics.ListAPIView):
-    queryset = Company.objects.all()
-    serializer_class = CompanySerializer
-    permission_classes = [
-        IsAdminOrReadOnly,
-    ]
-
-
 class CompanyDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Admin updates their company.
+    The company is created when they create an account.
+    """
+
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = [
@@ -62,7 +72,23 @@ class CompanyDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Company.objects.filter(owner=self.request.user)
 
 
+class CompanyListView(generics.ListAPIView):
+    """
+    Users see the companies created
+    """
+
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+
+
 class CompanyDetail(generics.RetrieveAPIView):
+    """
+    Users see the details of the company
+    """
+
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = [
@@ -99,7 +125,7 @@ class NewspaperDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = NewsPaperSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
-        IsAdmin,
+        IsAdminOrReadOnly,
     ]
     lookup_field = "id"
 
@@ -109,7 +135,7 @@ class NewspaperDetailView(generics.RetrieveUpdateDestroyAPIView):
         """
         self.destroy(request, *args, **kwargs)
         return Response(
-            {"message": "Company deleted successfully"},
+            {"message": "Newspaper deleted successfully"},
             status=status.HTTP_204_NO_CONTENT,
         )
 
@@ -127,6 +153,13 @@ class NewspaperDetail(generics.RetrieveAPIView):
 
 
 class NewsArticleListCreate(generics.ListCreateAPIView):
+    """
+    Editor creates an article.
+    The editor has to write for a newspaper.
+    TODO: Restrict creations of articles to only editors included
+    in a specific company.
+    """
+
     queryset = NewsArticle.objects.all()
     serializer_class = NewsArticleSerializer
     permission_classes = [
@@ -142,21 +175,21 @@ class NewsArticleListCreate(generics.ListCreateAPIView):
 
 
 class AllNewsArticleList(generics.ListAPIView):
+    """
+    Enables users see the news articles.
+    They do not need to be authenticated.
+    """
+
     queryset = NewsArticle.objects.all()
     serializer_class = NewsArticleSerializer
 
 
-class ArticleCompanyList(generics.ListAPIView):
-    serializer_class = NewsArticleSerializer
-    permission_classes = [
-        IsAdminOrReadOnly,
-    ]
-
-    def get_queryset(self):
-        return NewsArticle.objects.filter(newspaper__company__owner=self.request.user)
-
-
 class ArticleDetail(generics.RetrieveAPIView):
+    """
+    User sees the details of the article
+    User needs to be authenticated.
+    """
+
     queryset = NewsArticle.objects.all()
     serializer_class = NewsArticleSerializer
     lookup_field = "id"
@@ -164,6 +197,12 @@ class ArticleDetail(generics.RetrieveAPIView):
 
 
 class NewsArticleDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Editor of the article updates the article.
+    Only the editor is allowed to edit their article.
+    Permission yet to be given to the admin.
+    """
+
     queryset = NewsArticle.objects.all()
     serializer_class = NewsArticleSerializer
     lookup_field = "slug"
@@ -184,6 +223,93 @@ class NewsArticleDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return NewsArticle.objects.filter(editor=self.request.user)
+
+
+class ArticleCompanyList(generics.ListAPIView):
+    """
+    This view allows owner of the company see the articles
+    of the company.
+    Allows the chief editor create the News Instances of the day.
+    """
+
+    serializer_class = NewsArticleSerializer
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
+
+    def get_queryset(self):
+        return NewsArticle.objects.filter(newspaper__company__owner=self.request.user)
+
+
+class NewsInstanceListCreateView(generics.ListCreateAPIView):
+    """
+    An instance of the newspaper is created by the chief editor and
+    released to the user. The instance is based on the status of the
+    magazine/newspaper.
+    """
+
+    serializer_class = NewsInstanceSerializer
+    queryset = NewsInstance.objects.all()
+    permission_classes = [
+        IsAdmin,
+        IsAuthenticated,
+    ]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def get_queryset(self):
+        return NewsInstance.objects.filter(created_by=self.request.user)
+
+
+class NewsInstanceDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Chief editor updates the instance
+    TODO: add feature of self destroy: check django cellery
+    """
+
+    serializer_class = NewsInstanceSerializer
+    queryset = NewsInstance.objects.all()
+    permission_classes = [
+        IsAdminOrReadOnly,
+        IsAuthenticated,
+    ]
+    lookup_field = "id"
+
+    def delete(self, request: Request, *args, **kwargs) -> Response:
+        """
+        Returns message on deletion of companies
+        """
+        self.destroy(request, *args, **kwargs)
+        return Response(
+            {"message": "Newspaper deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+    def get_queryset(self):
+        return NewsInstance.objects.filter(created_by=self.request.user)
+
+
+class NewsTodayWeeklyMonthyListView(generics.ListAPIView):
+    """
+    readers see the list of news released on that month, day or week
+    """
+
+    serializer_class = NewsInstanceSerializer
+    queryset = NewsInstance.objects.all()
+
+
+class NewsTodayWeeklyMonthyDetailView(generics.RetrieveAPIView):
+    """
+    Readers get the details of the news
+    """
+
+    serializer_class = NewsInstanceSerializer
+    queryset = NewsInstance.objects.all()
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    lookup_field = "id"
 
 
 class ArticleCommentListView(generics.ListCreateAPIView):

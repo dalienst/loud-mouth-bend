@@ -16,6 +16,7 @@ class Playlist(UniversalIdModel, TimeStampedModel):
     def __str__(self) -> str:
         return self.name
 
+
 class Movie(TimeStampedModel, UniversalIdModel):
     name = models.CharField(max_length=400)
 
@@ -23,10 +24,23 @@ class Movie(TimeStampedModel, UniversalIdModel):
         return self.name
 
 
-class MovieStore(UniversalIdModel, TimeStampedModel):
+class Genre(UniversalIdModel, TimeStampedModel):
     name = models.CharField(max_length=400)
-    movies = models.ManyToManyField(Movie, related_name="moviestore")
 
     def __str__(self) -> str:
         return self.name
 
+
+class Recommendation(UniversalIdModel, TimeStampedModel):
+    day = models.CharField(max_length=400)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE, related_name="genre")
+    movies = models.ManyToManyField(Movie, related_name="movies")
+
+
+class DailyRecommendation(UniversalIdModel, TimeStampedModel):
+    genre = models.OneToOneField(Genre, on_delete=models.CASCADE)
+    day = models.CharField(max_length=400, blank=False, null=False, default="")
+    movies = models.ManyToManyField(Movie, related_name="movies_of_the_day")
+
+    def __str__(self) -> str:
+        return self.day

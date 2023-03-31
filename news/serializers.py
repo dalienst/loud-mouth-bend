@@ -4,10 +4,12 @@ from news.models import (
     ArticleComment,
     Category,
     Company,
+    NewsInstance,
 )
 from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from datetime import date
 
 User = get_user_model()
 
@@ -127,6 +129,42 @@ class NewsArticleSerializer(serializers.ModelSerializer):
             "comments",
             "categories",
         )
+
+
+class NewsInstanceSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    day = serializers.DateField()
+    newspaper = serializers.SlugRelatedField(
+        queryset=Newspaper.objects.all(), slug_field="name"
+    )
+    articles = serializers.SlugRelatedField(
+        many=True,
+        queryset=NewsArticle.objects.all(),
+        slug_field="title",
+    )
+    created_by = serializers.CharField(read_only=True, source="created_by.username")
+
+    class Meta:
+        model = NewsInstance
+        fields = (
+            "id",
+            "day",
+            "newspaper",
+            "articles",
+            "created_by",
+        )
+        read_only_fields = (
+            "id",
+            "created_by",
+        )
+
+    def create(self, validated_data):
+        day = validated_data.get("day")
+
+        if day < date.today():
+            raise serializers.ValidationError("Date cannot be in the past")
+
+        return super().create(validated_data)
 
 
 class ArticleCommentSerializer(serializers.ModelSerializer):
