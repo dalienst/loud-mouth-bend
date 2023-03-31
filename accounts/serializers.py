@@ -9,6 +9,7 @@ from accounts.validators import (
     validate_password_symbol,
     validate_password_uppercase,
 )
+from news.models import Company
 
 User = get_user_model()
 
@@ -111,8 +112,8 @@ class AdminSerializer(serializers.ModelSerializer):
     )
     articles = serializers.StringRelatedField(many=True, read_only=True)
     category = serializers.StringRelatedField(many=True, read_only=True)
-    company = serializers.StringRelatedField(many=True, read_only=True)
-    chief_editor = serializers.StringRelatedField(many=True, read_only=True)
+    newspaper = serializers.StringRelatedField(many=True, read_only=True)
+    company = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = User
@@ -127,7 +128,7 @@ class AdminSerializer(serializers.ModelSerializer):
             "articles",
             "category",
             "company",
-            "chief_editor",
+            "newspaper",
         )
         read_only_fields = (
             "id",
@@ -137,7 +138,7 @@ class AdminSerializer(serializers.ModelSerializer):
             "articles",
             "category",
             "company",
-            "chief_editor",
+            "newspaper",
         )
 
     def create(self, validated_data):
@@ -148,6 +149,7 @@ class AdminSerializer(serializers.ModelSerializer):
         admin.is_staff = True
         admin.save()
         Profile.objects.create(user=admin)
+        Company.objects.create(owner=admin)
         return admin
 
 
@@ -184,7 +186,9 @@ class EditorSerializer(serializers.ModelSerializer):
     )
     articles = serializers.StringRelatedField(many=True, read_only=True)
     category = serializers.StringRelatedField(many=True, read_only=True)
-    # companies = serializers.StringRelatedField(many=True, read_only=True)
+    companies = serializers.StringRelatedField(many=True, read_only=True)
+    newspaper = serializers.StringRelatedField(many=True, read_only=True)
+    company = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = User
@@ -198,7 +202,9 @@ class EditorSerializer(serializers.ModelSerializer):
             "is_admin",
             "articles",
             "category",
-            # "companies",
+            "companies",
+            "newspaper",
+            "company",
         )
         read_only_fields = (
             "id",
@@ -207,7 +213,9 @@ class EditorSerializer(serializers.ModelSerializer):
             "is_admin",
             "articles",
             "category",
-            # "companies",
+            "companies",
+            "newspaper",
+            "company",
         )
 
     def create(self, validated_data):

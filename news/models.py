@@ -18,11 +18,10 @@ class Company(UniversalIdModel, TimeStampedModel):
     A company can have very many editors
     """
 
-    name = models.CharField(max_length=400, blank=False, null=False)
+    owner = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=400, blank=False, null=False, default="")
     editors = models.ManyToManyField(User, related_name="companies")
-    created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="company"
-    )
+    # newspapers = models.ManyToManyField(Newspaper, related_name="newspapers")
 
     class Meta:
         ordering = ["-created_at"]
@@ -43,7 +42,6 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
     name = models.CharField(max_length=400, blank=False, null=False)
     tagline = models.CharField(max_length=400, blank=False, null=False)
 
-
     PAPER_SCHEDULE = (
         ("D", "Daily"),
         ("W", "Weekly"),
@@ -52,10 +50,10 @@ class Newspaper(UniversalIdModel, TimeStampedModel):
     )
     schedule = models.CharField(max_length=1, choices=PAPER_SCHEDULE, default="D")
     company = models.ForeignKey(
-        Company, on_delete=models.CASCADE, related_name="newspaper"
+        Company, on_delete=models.CASCADE, related_name="newspapers"
     )
     created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="chief_editor"
+        User, on_delete=models.CASCADE, related_name="newspaper"
     )
 
     class Meta:
@@ -82,10 +80,12 @@ class NewsArticle(UniversalIdModel, TimeStampedModel):
     read_time = models.PositiveIntegerField(blank=True, null=True)
     editor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     is_mainstory = models.BooleanField(default=False)
-    newspaper = models.ManyToManyField(Newspaper, related_name="articles")
+    newspaper = models.ManyToManyField(Newspaper, related_name="articles", blank=False)
 
     class Meta:
-        ordering = ["-is_mainstory", "-created_at"]
+        ordering = [
+            "-created_at",
+        ]
         verbose_name = "News Article"
         verbose_name_plural = "News Articles"
 
@@ -102,6 +102,23 @@ def slug_pre_save(sender, instance, **kwargs) -> None:
 @receiver(pre_save, sender=NewsArticle)
 def reading_time_pre_save(sender, instance, **kwargs) -> None:
     instance.read_time = math.ceil(instance.body.count(" ") // 200)
+
+
+class NewsInstance(UniversalIdModel):
+    day = models.DateField()
+    newspaper = models.ForeignKey(
+        Newspaper, related_name="newspaper_instance", on_delete=models.CASCADE
+    )
+    articles = models.ManyToManyField(NewsArticle, related_name="news_of_the_day")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["-day"]
+        verbose_name = "News Instance"
+        verbose_name_plural = "News Instances"
+
+    def __str__(self) -> str:
+        return f"{self.day} - {self.newspaper.name}"
 
 
 class ArticleComment(UniversalIdModel, TimeStampedModel):
