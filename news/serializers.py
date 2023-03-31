@@ -38,11 +38,6 @@ class CompanySerializer(serializers.ModelSerializer):
             "newspapers",
         )
 
-    # def update(self, instance, validated_data):
-    #     instance.name = validated_data.get("name", instance.name)
-    #     instance.save()
-    #     return instance
-
 
 class NewsPaperSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)

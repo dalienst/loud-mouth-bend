@@ -6,9 +6,16 @@ from playlists.serializers import (
     MovieSerializer,
     GenreSerializer,
     RecommendationSerializer,
-    DailyRecommendationSerializer
+    DailyRecommendationSerializer,
 )
-from playlists.models import Song, Playlist, Movie, Genre, Recommendation, DailyRecommendation
+from playlists.models import (
+    Song,
+    Playlist,
+    Movie,
+    Genre,
+    Recommendation,
+    DailyRecommendation,
+)
 
 
 class SongViewSet(viewsets.ModelViewSet):
@@ -34,6 +41,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 class RecommendationViewSet(viewsets.ModelViewSet):
     queryset = Recommendation.objects.all()
     serializer_class = RecommendationSerializer
+
 
 class DailyRecommendationViewSet(viewsets.ModelViewSet):
     queryset = DailyRecommendation.objects.all()
