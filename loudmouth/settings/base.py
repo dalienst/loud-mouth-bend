@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "accounts",
     "journal",
     "news",
+    "blog",
     "playlists",
 ]
 

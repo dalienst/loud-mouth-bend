@@ -47,6 +47,8 @@ class UserSerializer(serializers.ModelSerializer):
             validate_password_lowercase,
         ],
     )
+    story = serializers.StringRelatedField(many=True, read_only=True)
+    comment = serializers.StringRelatedField(many=True, read_only=True)
     commenter = serializers.StringRelatedField(many=True, read_only=True)
     category = serializers.StringRelatedField(many=True, read_only=True)
 
@@ -60,6 +62,8 @@ class UserSerializer(serializers.ModelSerializer):
             "is_verified",
             "is_editor",
             "is_admin",
+            "story",
+            "comment",
             "commenter",
             "category",
         )
@@ -68,6 +72,8 @@ class UserSerializer(serializers.ModelSerializer):
             "is_verified",
             "is_editor",
             "is_admin",
+            "story",
+            "comment",
             "commenter",
             "category",
         )
