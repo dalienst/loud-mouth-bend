@@ -14,7 +14,7 @@ from blog.serializers import (
 )
 from accounts.permissions import IsUser
 from news.permissions import IsUserOrReadOnly
-from blog.permissions import IsOwnerOrReadOnly
+from blog.permissions import IsOwnerOrReadOnly, MyObject
 
 
 class BlogListCreateView(generics.ListCreateAPIView):
@@ -36,8 +36,7 @@ class BlogDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BlogSerializer
     queryset = Blog.objects.all()
     permission_classes = [
-        IsAuthenticatedOrReadOnly,
-        IsUser,
+        MyObject
     ]
     lookup_field = "id"
 
@@ -159,8 +158,11 @@ class BookmarkListCreateView(generics.ListCreateAPIView):
     serializer_class = ArticleBookmarkSerializer
     permission_classes = [IsUser, IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(bookmarker=self.request.user)
+
     def get_queryset(self):
-        return ArticleBookmark.objects.filter(user=self.request.user)
+        return ArticleBookmark.objects.filter(bookmarker=self.request.user)
 
 
 class BookmarkDetailView(generics.ListCreateAPIView):
@@ -177,6 +179,9 @@ class RatingListCreateView(generics.ListCreateAPIView):
     queryset = ArticleRating.objects.all()
     serializer_class = ArticleRatingSerializer
     permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(rated_by=self.request.user)
 
     def get_queryset(self):
         return ArticleRating.objects.filter(rated_by=self.request.user)

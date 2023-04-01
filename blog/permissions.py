@@ -13,3 +13,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         self, request: Request, view: APIView, obj: Any
     ) -> bool:
         return bool(obj.author == request.user)
+    
+class MyObject(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return bool(obj.created_by == request.user)

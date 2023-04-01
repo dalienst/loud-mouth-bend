@@ -106,7 +106,7 @@ class ArticleBookmark(TimeStampedModel, UniversalIdModel):
     Bookmark model to store the articles bookmarked by a reader
     """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    bookmarker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookmark")
     # TODO: figure out if its M2M or O2M
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name="bookmarks"
@@ -118,12 +118,13 @@ class ArticleBookmark(TimeStampedModel, UniversalIdModel):
         verbose_name_plural = "Bookmarks"
 
 
+
 class ArticleRating(TimeStampedModel, UniversalIdModel):
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name="rating"
     )
     rated_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="rated_by"
+        User, on_delete=models.CASCADE, related_name="rated"
     )
     rating = models.PositiveIntegerField(default=0)
 

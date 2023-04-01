@@ -94,6 +94,9 @@ class CommentSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     comment = serializers.CharField(min_length=1)
     commenter = serializers.CharField(source="commenter.username", read_only=True)
+    article = serializers.SlugRelatedField(
+        queryset=Article.objects.all(), slug_field="title"
+    )
 
     class Meta:
         model = Comment
@@ -114,7 +117,7 @@ class LabelSerializer(serializers.ModelSerializer):
     name = serializers.CharField(min_length=1)
     owner = serializers.CharField(source="owner.username", read_only=True)
     articles = serializers.SlugRelatedField(
-        many=True, queryset=Article.objects.all(), slug_field="slug"
+        many=True, queryset=Article.objects.all(), slug_field="title"
     )
     is_public = serializers.BooleanField(default=False)
 
@@ -135,24 +138,32 @@ class LabelSerializer(serializers.ModelSerializer):
 
 class ArticleBookmarkSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    user = serializers.CharField(source="user.username", read_only=True)
+    bookmarker = serializers.CharField(source="user.username", read_only=True)
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), slug_field="slug"
+        queryset=Article.objects.all(), slug_field="title"
     )
 
     class Meta:
         model = ArticleBookmark
         fields = (
             "id",
-            "user",
+            "bookmarker",
             "article",
         )
+    
+    def create(self, validated_data):
+        request = self.context["request"]
+
+        validated_data["bookmarker"] = request.user
+        instance, _ = ArticleBookmark.objects.get_or_create(**validated_data)
+
+        return instance
 
 
 class ArticleRatingSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), slug_field="slug"
+        queryset=Article.objects.all(), slug_field="title"
     )
     rated_by = serializers.CharField(source="rated_by.username", read_only=True)
     rating = serializers.IntegerField(max_value=5, default=0)
@@ -165,3 +176,11 @@ class ArticleRatingSerializer(serializers.ModelSerializer):
             "rated_by",
             "rating",
         )
+
+    def create(self, validated_data):
+        request = self.context["request"]
+
+        validated_data["rated_by"] = request.user
+        instance, _ = ArticleRating.objects.get_or_create(**validated_data)
+
+        return instance

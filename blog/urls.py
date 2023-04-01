@@ -22,9 +22,9 @@ from blog.views import (
 
 urlpatterns = [
     # Blogs
-    path("blog", BlogListCreateView.as_view(), name="blog-list"),
+    path("blog/", BlogListCreateView.as_view(), name="blog-list"),
     path("blog/<str:id>/", BlogDetailView.as_view(), name="blog-detail"),
-    path("blogs", AllBlogsListView.as_view(), name="blogs-list"),
+    path("blogs/", AllBlogsListView.as_view(), name="blogs-list"),
     path("blogs/<str:id>/", AllBlogsDetailView.as_view(), name="blog-create"),
     # Stories
     path("story/", ArticleListCreateView.as_view(), name="story-list"),

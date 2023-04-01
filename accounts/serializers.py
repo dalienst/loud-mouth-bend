@@ -10,6 +10,7 @@ from accounts.validators import (
     validate_password_uppercase,
 )
 from news.models import Company
+from blog.serializers import ArticleBookmarkSerializer, ArticleRatingSerializer
 
 User = get_user_model()
 
@@ -49,6 +50,8 @@ class UserSerializer(serializers.ModelSerializer):
     )
     story = serializers.StringRelatedField(many=True, read_only=True)
     comment = serializers.StringRelatedField(many=True, read_only=True)
+    bookmark = ArticleBookmarkSerializer(many=True, read_only=True)
+    rated = ArticleRatingSerializer(many=True, read_only=True)
     commenter = serializers.StringRelatedField(many=True, read_only=True)
     category = serializers.StringRelatedField(many=True, read_only=True)
 
@@ -64,6 +67,8 @@ class UserSerializer(serializers.ModelSerializer):
             "is_admin",
             "story",
             "comment",
+            "bookmark",
+            "rated",
             "commenter",
             "category",
         )
@@ -74,6 +79,8 @@ class UserSerializer(serializers.ModelSerializer):
             "is_admin",
             "story",
             "comment",
+            "bookmark",
+            "rated",
             "commenter",
             "category",
         )
