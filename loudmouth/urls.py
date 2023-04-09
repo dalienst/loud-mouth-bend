@@ -22,4 +22,5 @@ urlpatterns = [
     path("journals/", include("journal.urls")),
     path("news/", include("news.urls")),
     path("music/", include("playlists.urls")),
+    path("write/", include("blog.urls")),
 ]

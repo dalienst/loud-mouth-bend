@@ -76,7 +76,6 @@ class NewsArticle(UniversalIdModel, TimeStampedModel):
     subtitle = models.CharField(max_length=1000, blank=True, null=True)
     image = CloudinaryField("news_images", blank=True, null=True)
     body = RichTextField()
-    # TODO: Ability to put an article into different categories
     read_time = models.PositiveIntegerField(blank=True, null=True)
     editor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     is_mainstory = models.BooleanField(default=False)

@@ -166,6 +166,9 @@ class ArticleCommentSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     comment = serializers.CharField(min_length=1)
     commenter = serializers.CharField(source="commenter.username", read_only=True)
+    article = serializers.SlugRelatedField(
+        queryset=NewsArticle.objects.all(), slug_field="title"
+    )
 
     class Meta:
         model = ArticleComment
