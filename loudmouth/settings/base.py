@@ -38,6 +38,8 @@ ALLOWED_HOSTS = [
     "http://127.0.0.1:3000",
     "localhost",
     "127.0.0.1",
+    "loud-mouth-bend-api.up.railway.app",
+    "loudmouth-api.onrender.com",
 ]
 
 
@@ -81,6 +83,8 @@ MIDDLEWARE = [
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "loud-mouth-bend-api.up.railway.app",
+    "loudmouth-api.onrender.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -88,6 +92,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "loud-mouth-bend-api.up.railway.app",
+    "loudmouth-api.onrender.com",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True

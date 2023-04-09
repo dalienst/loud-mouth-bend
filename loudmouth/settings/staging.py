@@ -5,6 +5,8 @@ ALLOWED_HOSTS += [
     "http://127.0.0.1:3000",
     "localhost",
     "127.0.0.1",
+    "loud-mouth-bend-api.up.railway.app",
+    "loudmouth-api.onrender.com",
 ]
 
 DEBUG = True
