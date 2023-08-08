@@ -240,6 +240,68 @@ class EditorSerializer(serializers.ModelSerializer):
         return editor
 
 
+class SalesSerializer(serializers.ModelSerializer):
+    """
+    incharge of the sales and ecommerce model
+    """
+
+    id = serializers.CharField(
+        read_only=True,
+    )
+
+    username = serializers.CharField(
+        max_length=20,
+        min_length=4,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+    )
+
+    password = serializers.CharField(
+        max_length=128,
+        min_length=5,
+        write_only=True,
+        validators=[
+            validate_password_digit,
+            validate_password_uppercase,
+            validate_password_symbol,
+            validate_password_lowercase,
+        ],
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "username",
+            "password",
+            "is_verified",
+            "is_editor",
+            "is_admin",
+            "is_sales",
+        )
+        read_only_fields = (
+            "id",
+            "is_verified",
+            "is_editor",
+            "is_admin",
+            "is_sales",
+        )
+
+    def create(self, validated_data):
+        sales = User.objects.create_user(**validated_data)
+        sales.is_sales = True
+        sales.is_editor = True
+        sales.is_verified = True
+        sales.save()
+        Profile.objects.create(user=sales)
+        return sales
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     """
     The profile serializer to enable retrieval and updating of profile of the user

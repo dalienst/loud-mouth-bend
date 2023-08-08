@@ -77,6 +77,8 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel, UniversalIdMode
     is_editor = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_user = models.BooleanField(default=True)
+    is_sales = models.BooleanField(default=False)
+
 
     objects = UserManager()
     REQUIRED_FIELDS = ["username", "password"]

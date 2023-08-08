@@ -1,7 +1,5 @@
-from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from rest_framework import generics, response, status
+from rest_framework import generics, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -15,6 +13,7 @@ from accounts.serializers import (
     ProfileSerializer,
     EditorSerializer,
     AdminSerializer,
+    SalesSerializer,
 )
 from accounts.models import Profile
 from accounts.permissions import IsUser, MeUser
@@ -166,3 +165,48 @@ class ProfileListView(generics.ListAPIView):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
     permission_classes = (IsAuthenticated,)
+
+
+"""
+Shop section
+"""
+
+
+class SalesResgister(APIView):
+    def post(self, request: Request, format: str = "json") -> Response:
+        serializer = SalesSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+        response = serializer.data
+        response["refresh"] = str(refresh)
+        response["access"] = str(refresh.access_token)
+
+        return Response(response, status=status.HTTP_201_CREATED)
+
+
+class SalesDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = SalesSerializer
+    lookup_field = "id"
+    queryset = User.objects.all()
+    permission_classes = [
+        IsAuthenticated,
+        IsUser,
+    ]
+
+    def delete(self, request, *args, **kwargs):
+        user = self.request.user
+        user.delete()
+        return Response(
+            {"message": "Salesperson deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+
+class SalesView(generics.ListAPIView):
+    serializer_class = SalesSerializer
+    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+
+    def get_queryset(self):
+        return User.objects.filter(is_sales=True)

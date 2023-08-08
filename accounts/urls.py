@@ -16,6 +16,9 @@ from accounts.views import (
     AdminRegister,
     AdminDetailView,
     AdminView,
+    SalesResgister,
+    SalesDetailView,
+    SalesView,
 )
 
 urlpatterns = [
@@ -33,4 +36,7 @@ urlpatterns = [
     path("profile/<str:user>/", ProfileDetailView.as_view(), name="profile"),
     path("users/", UserView.as_view(), name="users"),
     path("profiles/", ProfileListView.as_view(), name="profiles"),
+    path("register/sales/", SalesResgister.as_view(), name="sales-register"),
+    path("sales/<str:id>/", SalesDetailView.as_view(), name="sales-detail"),
+    path("sales/", SalesView.as_view(), name="sales"),
 ]
